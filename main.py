@@ -1,5 +1,3 @@
-"""Server For Iyo"""
-
 from fastapi import FastAPI
 from detail.app import router as detail_router
 from pins.app import router as pins_router
