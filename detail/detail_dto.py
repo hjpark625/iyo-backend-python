@@ -6,8 +6,8 @@ from bson import ObjectId
 
 @dataclass
 class NearestRoute:
-    subwayLine: list[str] = None
-    routeInfo: str = None
+    subwayLine: Optional[list[str]] = field(default_factory=list)
+    routeInfo: Optional[str] = None
 
 
 @dataclass
@@ -36,16 +36,16 @@ class DetailSchema:
     _id: ObjectId
     name: str
     engName: str
+    address: str
+    coord: Coord
+    updatedAt: datetime
     socialLink: Optional[str] = None
     category: Optional[str] = None
-    address: str
     detailAddress: Optional[str] = None
     nearestRoute: Optional[NearestRoute] = None
-    operationTime: OperationTime = field(default_factory=OperationTime)
+    operationTime: list[OperationTime] = field(default_factory=list)
     phoneNumber: Optional[str] = None
-    coord: Coord
     description: Optional[str] = None
     introduce: Optional[str] = None
-    concept: list[str]
-    updatedAt: datetime
-    storeImages: StoreImages = field(default_factory=StoreImages)
+    concept: list[str] = field(default_factory=list)
+    storeImages: list[StoreImages] = field(default_factory=list)
