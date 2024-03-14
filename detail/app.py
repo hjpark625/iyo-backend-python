@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException
+from detail.detail_dto import DetailResponseDTO, DetailDTO
+from database.database import Database
 
 router = APIRouter()
 
@@ -9,5 +11,12 @@ def get_detail(storename: str):
         raise HTTPException(
             status_code=404, detail={"message": "storename is required"}
         )
-    print(not storename)
-    return {"message": f"you've been searched for {storename}"}
+    client = Database(db_name="iyo", table_name="details")
+    db = client.get_collection()
+
+    detail_data = db.find_one({"engName": storename})
+
+    detail_dto = DetailDTO(detail_data)
+    response_dto = DetailResponseDTO(detail_dto)
+
+    return response_dto.to_json_result()
