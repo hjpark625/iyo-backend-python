@@ -104,4 +104,5 @@ class DetailResponseDTO:
         }
 
     def to_json_result(self):
-        return {"data": self.to_dict()}
+        result = self.to_dict()
+        return {"data": result}
