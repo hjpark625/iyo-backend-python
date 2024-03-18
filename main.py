@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from detail.app import router as detail_router
 from pins.app import router as pins_router
+from auth.app import router as auth_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -21,6 +22,7 @@ app.add_middleware(
 
 app.include_router(detail_router)
 app.include_router(pins_router)
+app.include_router(auth_router)
 
 
 @app.get("/")
