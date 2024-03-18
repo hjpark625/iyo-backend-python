@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
+from typing import Union
 from detail.detail_dto import DetailResponseDTO, DetailDTO
 from database.database import Database
 from enums.http_status import HttpStatus
@@ -7,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/detail/{storename}")
-def get_detail(storename: str):
+def get_detail(storename: Union[str, None] = Path(title="상점 영어 이름")):
     if not storename or storename.strip() == "":
         raise HTTPException(
             status_code=HttpStatus.NOT_FOUND.value,
