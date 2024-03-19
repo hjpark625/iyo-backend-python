@@ -3,7 +3,7 @@ from bcrypt import checkpw
 from jwt import encode
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from auth.auth_dto import AccessTokenPayload
+from auth.auth_dto import AccessTokenPayload, RefreshTokenPayload
 
 
 load_dotenv()
@@ -17,8 +17,8 @@ def check_password(password: str, hashed: str) -> bool:
     return is_same
 
 
-def generate_access_token(access_token_payload: AccessTokenPayload):
-    origin_info = access_token_payload.__dict__
+def generate_access_token(user_dto: AccessTokenPayload) -> str:
+    origin_info = user_dto.__dict__
 
     exp_time = datetime.now() + timedelta(minutes=30)
 
@@ -33,3 +33,22 @@ def generate_access_token(access_token_payload: AccessTokenPayload):
     )
 
     return access_token
+
+
+def generate_refresh_token(user_dto: RefreshTokenPayload) -> str:
+    origin_info = user_dto.__dict__
+
+    exp_time = datetime.now() + timedelta(days=7)
+
+    refresh_token_payload = {
+        "userId": origin_info["userId"],
+        "email": origin_info["email"],
+        "isAdmin": origin_info["isAdmin"],
+        "exp": exp_time,
+    }
+
+    refresh_token = encode(
+        payload=refresh_token_payload, key=os.getenv("JWT_SECRET"), algorithm="HS256"
+    )
+
+    return refresh_token
