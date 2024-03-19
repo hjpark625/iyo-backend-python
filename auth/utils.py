@@ -32,6 +32,4 @@ def generate_access_token(access_token_payload: AccessTokenPayload):
         payload=access_token_payload, key=os.getenv("JWT_SECRET"), algorithm="HS256"
     )
 
-    print(access_token)
-
     return access_token
