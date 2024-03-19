@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, Union, Any
+from typing import Optional, Union
 from dataclasses import dataclass
 from bson import ObjectId
 
@@ -17,12 +17,24 @@ class User:
     isAdmin: bool = False
 
 
+@dataclass
+class AccessTokenPayload:
+    userId: str
+    email: str
+
+
+@dataclass
+class RefreshTokenPayload:
+    userId: str
+    email: str
+    hashed_password: str
+
+
 class UserDTO:
     def __init__(self, auth_data: User):
         self.userId = str(auth_data["_id"])
         self.email = auth_data["email"]
         self.nickname = auth_data["nickname"]
-        self.hashedPassword = auth_data["hashedPassword"]
         self.createdAt = (
             auth_data["createdAt"].isoformat()
             if isinstance(auth_data["createdAt"], datetime)
