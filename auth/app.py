@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from typing import Union
+from bson import ObjectId
 from auth.auth_dto import UserDTO, UserResponseDTO
 from database.database import Database
 from enums.http_status import HttpStatus
@@ -11,6 +12,7 @@ from auth.utils import (
     generate_access_token,
     generate_refresh_token,
     revalidate_access_token,
+    check_refresh_token,
 )
 
 router = APIRouter(prefix="/auth")
@@ -23,7 +25,7 @@ class UserBody(BaseModel):
 
 
 # TODO: 내부의 패스워드 체크, 토큰 발급 로직을 서비스 레이어로 분리해야함
-@router.post("/login")
+@router.post("/login", status_code=HttpStatus.OK.value)
 def login(login_info: UserBody):
     # body의 유저 정보를 객체로 변환
     user_dict = login_info.__dict__
@@ -88,12 +90,58 @@ def login(login_info: UserBody):
 #     return {"message": "register"}
 
 
-@router.post("/logout")
-def logout():
-    return {"message": "logout"}
+@router.post("/logout", status_code=HttpStatus.NO_CONTENT.value)
+def logout(authorization: Union[str, None] = Header(default=None)):
+    if not authorization:
+        raise HTTPException(
+            status_code=HttpStatus.BAD_REQUEST.value,
+            detail={
+                "status_code": HttpStatus.BAD_REQUEST.value,
+                "message": "토큰이 없습니다.",
+            },
+        )
+    token_type = authorization.split(" ")[0]
+    if token_type != "Bearer":
+        raise HTTPException(
+            status_code=HttpStatus.FORBIDDEN.value,
+            detail={
+                "status_code": HttpStatus.FORBIDDEN.value,
+                "message": "Bearer 토큰형태가 아닙니다.",
+            },
+        )
+
+    refresh_token = authorization.split(" ")[1]
+    decoded_refresh_token = check_refresh_token(refresh_token=refresh_token)
+
+    user_data = users_db.get_collection()
+    user = user_data.find_one(filter={"_id": ObjectId(decoded_refresh_token["userId"])})
+
+    if not user:
+        raise HTTPException(
+            status_code=HttpStatus.NOT_FOUND.value,
+            detail={
+                "status_code": HttpStatus.NOT_FOUND.value,
+                "message": "사용자 정보가 없습니다.",
+            },
+        )
+    if not user["refreshToken"]:
+        raise HTTPException(
+            status_code=HttpStatus.BAD_REQUEST.value,
+            detail={
+                "status_code": HttpStatus.BAD_REQUEST.value,
+                "message": "로그아웃된 사용자입니다.",
+            },
+        )
+
+    user_data.find_one_and_update(
+        filter={"_id": ObjectId(decoded_refresh_token["userId"])},
+        update={"$set": {"refreshToken": None}},
+    )
+
+    return
 
 
-@router.post("/revalidate")
+@router.post("/revalidate", status_code=HttpStatus.OK.value)
 def revalidate_token(authorization: Union[str, None] = Header(default=None)):
     print(authorization)
     if not authorization:
