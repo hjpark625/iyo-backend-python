@@ -63,12 +63,11 @@ def check_refresh_token(refresh_token: str):
         decoded_refresh_token = decode(
             refresh_token, key=os.getenv("JWT_SECRET"), algorithms=["HS256"]
         )
+        return decoded_refresh_token
     except ExpiredSignatureError:
         raise ExpiredSignatureError("토큰이 만료되었습니다.")
     except InvalidTokenError:
         raise InvalidTokenError("토큰이 유효하지 않습니다.")
-
-    return decoded_refresh_token
 
 
 def revalidate_access_token(refresh_token: str) -> str:
