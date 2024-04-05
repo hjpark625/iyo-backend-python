@@ -143,7 +143,6 @@ def logout(authorization: Union[str, None] = Header(default=None)):
 
 @router.post("/revalidate", status_code=HttpStatus.OK.value)
 def revalidate_token(authorization: Union[str, None] = Header(default=None)):
-    print(authorization)
     if not authorization:
         raise HTTPException(
             status_code=HttpStatus.BAD_REQUEST.value,
