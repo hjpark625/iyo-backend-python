@@ -28,3 +28,9 @@ app.include_router(auth_router)
 @app.get("/")
 def __main__():
     return {"message": "Server is Running"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app="main:app", host="0.0.0.0", port=4000, reload=True)
